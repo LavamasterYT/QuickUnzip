@@ -7,4 +7,8 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SevenZipExtractor" Version="1.0.15" />
+  </ItemGroup>
+
 </Project>

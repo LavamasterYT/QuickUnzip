@@ -64,17 +64,21 @@ namespace QuickUnzip
         
         private async void ExtractWindow_Shown(object sender, EventArgs e)
         {
+            Exception exl = new Exception();
+
             await Task.Run(() =>
             {
                 try
                 {
                     file.Extract();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Failed to extract file.\n\n" + e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    exl = ex;
+                    MessageBox.Show("Failed to extract file.\n\n" + Convert.ToString(ex), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
+            Clipboard.SetText(Convert.ToString(exl));
             this.Close();
         }
     }

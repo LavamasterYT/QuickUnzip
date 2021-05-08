@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using SevenZipExtractor;
 using System.IO.Compression;
 
 namespace QuickUnzip
@@ -9,7 +10,7 @@ namespace QuickUnzip
         public string ArchivePath { get; set; }
         public int ArchiveContentsCount { get; set; }
 
-        private ZipArchive _archive;
+        private SevenZipExtractor.ArchiveFile archive;
 
         public event EventHandler<ZipProgressArgs> EntryExtracting;
 
@@ -26,13 +27,13 @@ namespace QuickUnzip
                 ArchivePath = ArchivePath.Substring(1, ArchivePath.Length - 2);
             }
 
-            _archive = ZipFile.OpenRead(ArchivePath);
-            ArchiveContentsCount = _archive.Entries.Count;
+            this.archive = new SevenZipExtractor.ArchiveFile(ArchivePath);
+            ArchiveContentsCount = this.archive.Entries.Count;
         }
 
         public string GetEntry(int index)
         {
-            return _archive.Entries[index].Name;
+            return Path.GetFileNameWithoutExtension(archive.Entries[index].FileName);
         }
 
         public void Extract()
@@ -49,21 +50,21 @@ namespace QuickUnzip
             Directory.SetCurrentDirectory(mainArchiveDir);
 
             // Start extracting
-            for (int i = 0; i < _archive.Entries.Count; i++)
+            for (int i = 0; i < archive.Entries.Count; i++)
             {
-                EntryExtracting?.Invoke(this, new ZipProgressArgs() { Entry = _archive.Entries[i].FullName, Execution = ZipProgressArgsType.Extracting, Index = i });
+                EntryExtracting?.Invoke(this, new ZipProgressArgs() { Entry = archive.Entries[i].FileName, Execution = ZipProgressArgsType.Extracting, Index = i });
 
-                if (_archive.Entries[i].FullName.EndsWith('/'))
-                    Directory.CreateDirectory(_archive.Entries[i].FullName);
+                if (archive.Entries[i].FileName.EndsWith('/'))
+                    Directory.CreateDirectory(archive.Entries[i].FileName);
                 else
-                    _archive.Entries[i].ExtractToFile(_archive.Entries[i].FullName);
+                    archive.Entries[i].Extract(archive.Entries[i].FileName);
             }
         }
 
         #region Dispose Code
         public void Dispose()
         {
-            _archive.Dispose();
+            archive.Dispose();
         }
 
         ~ArchiveFile()
